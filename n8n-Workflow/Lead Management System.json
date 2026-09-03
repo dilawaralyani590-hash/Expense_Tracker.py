@@ -1,0 +1,1747 @@
+{
+  "name": "Lead Management System",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "n8n-lead",
+        "options": {}
+      },
+      "id": "e0506fa5-96f5-426f-8e3c-e70ff53f4906",
+      "name": "Lead Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        96
+      ],
+      "webhookId": "d634127e-fbdb-4f60-b724-6bec9560751e"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const data = $json.body || $json;\n\n// 1. Extract and sanitize inputs\nconst full_Name = String(data.full_name ?? \"\").trim();\nconst email = String(data.email ?? \"\").trim();\nconst company = String(data.company ?? \"\").trim();\nconst job_title = $json.job_title || $json.body?.job_title || \"\";\nconst source = $json.source ||$json.body?.source || \"\";\n\nconst interested_in = String(data.interested_in ?? \"\").trim();\nconst message = String(data.message ?? \"\").trim();\n\n// 2. Define allowed values for 'Interested In' (adjust to match your Airtable options)\nconst allowedinterested_in = [\n    \n  \"Web Development\",\n  \"Automation\",\n  \"AI & Solutions\",\n  \n  \"Other\"\n];\n\n// 3. Perform basic validation checks\nconst isFullNameValid = full_Name.length > 0;\nconst isEmailValid = email.length > 0 && email.includes(\"@\");\nconst isCompanyValid = company.length > 0;\nconst isinterested_inValid = allowedinterested_in.includes(interested_in);\nconst isMessageValid = message.length > 0;\n\nconst isValid = isFullNameValid && isEmailValid && isCompanyValid && isinterested_inValid && isMessageValid;\n\n// 4. Return processed fields and Airtable routing flags\nreturn {\n  full_Name,\n  email,\n  company,\n  job_title,\n  source,\n  interested_in,\n  message,\n  isValid,\n  status: \"New\",\n  followUp: isValid ? \"\" : \"Missing required information\"\n};"
+      },
+      "id": "dab85059-a166-4e06-abd3-3eb9d5086e77",
+      "name": "Validate Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "valid",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c6772251-b74b-46b5-ad5c-99460fc098d8",
+      "name": "Is Valid Lead",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appRYCTzOiT7aFc0x",
+          "mode": "list",
+          "cachedResultName": "Lead Management System",
+          "cachedResultUrl": "https://airtable.com/appRYCTzOiT7aFc0x"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbleqTcD6iNO2IlIX",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appRYCTzOiT7aFc0x/tbleqTcD6iNO2IlIX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $json.full_Name }}",
+            "Email": "={{ $json.email }}",
+            "Company": "={{ $json.company }}",
+            "Message": "={{ $json.message }}",
+            "Interested In": "={{ $json.interested_in }}",
+            "Job Title": "={{ $json.job_title }}",
+            "Source": "={{ $json.source }}",
+            "Created At": "2026-08-29T13:25:55",
+            "Last Updated": "2026-08-29T13:26:07"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Lead ID",
+              "displayName": "Lead ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Website",
+                  "value": "Website"
+                },
+                {
+                  "name": "LinkedIn",
+                  "value": "LinkedIn"
+                },
+                {
+                  "name": "Referral",
+                  "value": "Referral"
+                },
+                {
+                  "name": "Advertisement",
+                  "value": "Advertisement"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Interested In",
+              "displayName": "Interested In",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Web Development",
+                  "value": "Web Development"
+                },
+                {
+                  "name": "Automation",
+                  "value": "Automation"
+                },
+                {
+                  "name": "AI Solutions",
+                  "value": "AI Solutions"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High",
+                  "value": "High"
+                },
+                {
+                  "name": "Medium",
+                  "value": "Medium"
+                },
+                {
+                  "name": "Low",
+                  "value": "Low"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Category",
+              "displayName": "AI Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High-Intent",
+                  "value": "High-Intent"
+                },
+                {
+                  "name": "Potential",
+                  "value": "Potential"
+                },
+                {
+                  "name": "Low-Intent",
+                  "value": "Low-Intent"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Reason",
+              "displayName": "AI Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Assigned Team",
+              "displayName": "Assigned Team",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Sales Team",
+                  "value": "Sales Team"
+                },
+                {
+                  "name": "Marketing Team",
+                  "value": "Marketing Team"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow-Up",
+              "displayName": "Follow-Up",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "validate_name",
+              "displayName": "validate_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Created By",
+              "displayName": "Created By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d05e514b-41ab-4b5c-9ddf-dd5621404476",
+      "name": "Create Lead Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        0
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ug319CBbboShlzue",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-5-mini"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a B2B lead-qualification assistant for a software & automation agency.\nYou receive structured details about a single inbound lead and must classify it.\n\nConsider these criteria: how clearly the message describes a concrete business need,\nthe seniority implied by the job title, the fit of the company, the quality of the\nacquisition source, and how well the stated interest maps to our services\n(Web Development, Automation, AI Solutions).\n\nYou MUST return exactly one value from each allowed set:\n- ai_category: one of \"High-Intent\", \"Potential\", \"Low-Intent\".\n- priority: one of \"High\", \"Medium\", \"Low\".\n- ai_reason: a short (1-2 sentence) explanation for the classification.\n\nDo not invent facts that are not present in the input. Base your reasoning only on\nthe information provided. Respond using the required structured JSON format only."
+            },
+            {
+              "content": "=Classify this lead:\nJob Title: {{ $('Validate Lead').item.json.job_title }}\nCompany: {{ $('Validate Lead').item.json.company }}\nSource: {{ $('Validate Lead').item.json.source }}\nInterested In: {{ $('Validate Lead').item.json.interested_in }}\nMessage: {{ $('Validate Lead').item.json.message }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 600,
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "name": "lead_analysis",
+              "schema": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"ai_category\",\"priority\",\"ai_reason\"],\"properties\":{\"ai_category\":{\"type\":\"string\",\"enum\":[\"High-Intent\",\"Potential\",\"Low-Intent\"]},\"priority\":{\"type\":\"string\",\"enum\":[\"High\",\"Medium\",\"Low\"]},\"ai_reason\":{\"type\":\"string\"}}}",
+              "strict": true
+            }
+          }
+        }
+      },
+      "id": "7df0a479-2c1d-4dcc-bf66-4fa948667e12",
+      "name": "AI Lead Analysis",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ra2rhoCHaZaaB3AN",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const root = $input.first().json;\nlet ai = root && root.output && root.output[0] && root.output[0].content && root.output[0].content[0]\n  ? root.output[0].content[0].text\n  : undefined;\nif (typeof ai === 'string') { try { ai = JSON.parse(ai); } catch (e) { ai = {}; } }\nif (!ai || typeof ai !== 'object') { ai = {}; }\nconst ai_category = ai.ai_category || 'Low-Intent';\nconst priority = ai.priority || 'Low';\nconst ai_reason = ai.ai_reason || 'No reason provided.';\nlet status, assigned_team, follow_up;\nif (priority === 'High') {\n  status = 'Qualified'; assigned_team = 'Sales Team'; follow_up = 'Contact the lead as soon as possible';\n} else if (priority === 'Medium') {\n  status = 'Contacted'; assigned_team = 'Sales Team'; follow_up = 'Contact the lead within 3 days';\n} else {\n  status = 'New'; assigned_team = 'Marketing Team'; follow_up = 'Add the lead to the marketing follow-up list';\n}\nreturn [{ ai_category, priority, ai_reason, status, assigned_team, follow_up }];"
+      },
+      "id": "ce8d90a6-7fc3-400a-9f0e-b5bbd6aa8f34",
+      "name": "Apply Business Rules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appRYCTzOiT7aFc0x",
+          "mode": "list",
+          "cachedResultName": "Lead Management System",
+          "cachedResultUrl": "https://airtable.com/appRYCTzOiT7aFc0x"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbleqTcD6iNO2IlIX",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appRYCTzOiT7aFc0x/tbleqTcD6iNO2IlIX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Create Lead Record').item.json.id }}",
+            "AI Category": "={{ $json.ai_category }}",
+            "Priority": "={{ $json.priority }}",
+            "AI Reason": "={{ $json.ai_reason }}",
+            "Last Updated": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Lead ID",
+              "displayName": "Lead ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Website",
+                  "value": "Website"
+                },
+                {
+                  "name": "LinkedIn",
+                  "value": "LinkedIn"
+                },
+                {
+                  "name": "Referral",
+                  "value": "Referral"
+                },
+                {
+                  "name": "Advertisement",
+                  "value": "Advertisement"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Interested In",
+              "displayName": "Interested In",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Web Development",
+                  "value": "Web Development"
+                },
+                {
+                  "name": "Automation",
+                  "value": "Automation"
+                },
+                {
+                  "name": "AI Solutions",
+                  "value": "AI Solutions"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High",
+                  "value": "High"
+                },
+                {
+                  "name": "Medium",
+                  "value": "Medium"
+                },
+                {
+                  "name": "Low",
+                  "value": "Low"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Category",
+              "displayName": "AI Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High-Intent",
+                  "value": "High-Intent"
+                },
+                {
+                  "name": "Potential",
+                  "value": "Potential"
+                },
+                {
+                  "name": "Low-Intent",
+                  "value": "Low-Intent"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Reason",
+              "displayName": "AI Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Assigned Team",
+              "displayName": "Assigned Team",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Sales Team",
+                  "value": "Sales Team"
+                },
+                {
+                  "name": "Marketing Team",
+                  "value": "Marketing Team"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow-Up",
+              "displayName": "Follow-Up",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "validate_name",
+              "displayName": "validate_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Created By",
+              "displayName": "Created By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "044c9763-a346-497d-a939-f85c463edbf4",
+      "name": "Update AI Results",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        0
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ug319CBbboShlzue",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appRYCTzOiT7aFc0x",
+          "mode": "list",
+          "cachedResultName": "Lead Management System",
+          "cachedResultUrl": "https://airtable.com/appRYCTzOiT7aFc0x"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbleqTcD6iNO2IlIX",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appRYCTzOiT7aFc0x/tbleqTcD6iNO2IlIX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Create Lead Record').item.json.id }}",
+            "Status": "={{ $('Apply Business Rules').item.json.status }}",
+            "Assigned Team": "={{ $('Apply Business Rules').item.json.assigned_team }}",
+            "Follow-Up": "={{ $('Apply Business Rules').item.json.follow_up }}",
+            "Last Updated": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Lead ID",
+              "displayName": "Lead ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Website",
+                  "value": "Website"
+                },
+                {
+                  "name": "LinkedIn",
+                  "value": "LinkedIn"
+                },
+                {
+                  "name": "Referral",
+                  "value": "Referral"
+                },
+                {
+                  "name": "Advertisement",
+                  "value": "Advertisement"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Interested In",
+              "displayName": "Interested In",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Web Development",
+                  "value": "Web Development"
+                },
+                {
+                  "name": "Automation",
+                  "value": "Automation"
+                },
+                {
+                  "name": "AI Solutions",
+                  "value": "AI Solutions"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High",
+                  "value": "High"
+                },
+                {
+                  "name": "Medium",
+                  "value": "Medium"
+                },
+                {
+                  "name": "Low",
+                  "value": "Low"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Category",
+              "displayName": "AI Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High-Intent",
+                  "value": "High-Intent"
+                },
+                {
+                  "name": "Potential",
+                  "value": "Potential"
+                },
+                {
+                  "name": "Low-Intent",
+                  "value": "Low-Intent"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Reason",
+              "displayName": "AI Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Assigned Team",
+              "displayName": "Assigned Team",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Sales Team",
+                  "value": "Sales Team"
+                },
+                {
+                  "name": "Marketing Team",
+                  "value": "Marketing Team"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow-Up",
+              "displayName": "Follow-Up",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "validate_name",
+              "displayName": "validate_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Created By",
+              "displayName": "Created By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "57d86b20-46bb-4505-95c1-b4446795b868",
+      "name": "Update Business Rules",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1568,
+        0
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "zDy5Wb7mUwQIH6kf",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "axadch22@gmail.com",
+        "subject": "New Lead Processed",
+        "emailType": "text",
+        "message": "=New Lead Processed\nFull_name : {{ $('Validate Lead').item.json.full_Name }}\nCompany : {{ $('Validate Lead').item.json.company }}\nCategory: {{ $('Apply Business Rules').item.json.ai_category }}\nPriority: {{ $('Apply Business Rules').item.json.priority }}\nAssigned Team: {{ $('Apply Business Rules').item.json.assigned_team }}\nFollow-Up: {{ $('Apply Business Rules').item.json.follow_up }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b10ca7b1-eac6-4598-be34-8346330e359c",
+      "name": "Send Notification",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        0
+      ],
+      "webhookId": "f612758d-de9c-4374-ad22-f89820b8b43c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2ni6unhKTpH8iFfN",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appRYCTzOiT7aFc0x",
+          "mode": "list",
+          "cachedResultName": "Lead Management System",
+          "cachedResultUrl": "https://airtable.com/appRYCTzOiT7aFc0x"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbleqTcD6iNO2IlIX",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appRYCTzOiT7aFc0x/tbleqTcD6iNO2IlIX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $json.full_Name }}",
+            "Email": "={{ $json.email }}",
+            "Company": "={{ $json.company }}",
+            "Message": "={{ $json.message }}",
+            "Interested In": "={{ $json.interested_in }}",
+            "Follow-Up": "={{ $json.followUp }}",
+            "Status": "={{ $json.status }}",
+            "Source": "={{ $json.source }}",
+            "Job Title": "={{ $json.job_title }}",
+            "Created At": "2026-08-29T13:26:19",
+            "Last Updated": "2026-08-29T13:26:22"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Lead ID",
+              "displayName": "Lead ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Website",
+                  "value": "Website"
+                },
+                {
+                  "name": "LinkedIn",
+                  "value": "LinkedIn"
+                },
+                {
+                  "name": "Referral",
+                  "value": "Referral"
+                },
+                {
+                  "name": "Advertisement",
+                  "value": "Advertisement"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Interested In",
+              "displayName": "Interested In",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Web Development",
+                  "value": "Web Development"
+                },
+                {
+                  "name": "Automation",
+                  "value": "Automation"
+                },
+                {
+                  "name": "AI Solutions",
+                  "value": "AI Solutions"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Contacted",
+                  "value": "Contacted"
+                },
+                {
+                  "name": "Qualified",
+                  "value": "Qualified"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High",
+                  "value": "High"
+                },
+                {
+                  "name": "Medium",
+                  "value": "Medium"
+                },
+                {
+                  "name": "Low",
+                  "value": "Low"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Category",
+              "displayName": "AI Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "High-Intent",
+                  "value": "High-Intent"
+                },
+                {
+                  "name": "Potential",
+                  "value": "Potential"
+                },
+                {
+                  "name": "Low-Intent",
+                  "value": "Low-Intent"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Reason",
+              "displayName": "AI Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Assigned Team",
+              "displayName": "Assigned Team",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Sales Team",
+                  "value": "Sales Team"
+                },
+                {
+                  "name": "Marketing Team",
+                  "value": "Marketing Team"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Follow-Up",
+              "displayName": "Follow-Up",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "validate_name",
+              "displayName": "validate_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Created By",
+              "displayName": "Created By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "d792e915-ba9d-45b3-a4b3-e7ef8c46da81",
+      "name": "Create Incomplete Lead",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        192
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ug319CBbboShlzue",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "UOz8cAj9TFSg1SUs",
+          "mode": "list",
+          "cachedResultName": "Lead Management",
+          "cachedResultUrl": "/projects/0FTn8A692axcvwqK/datatables/UOz8cAj9TFSg1SUs"
+        }
+      },
+      "type": "n8n-nodes-base.evaluationTrigger",
+      "typeVersion": 4.7,
+      "position": [
+        -144,
+        -144
+      ],
+      "id": "660f17a7-73a7-4cf9-9a3b-0307622c9120",
+      "name": "When fetching a dataset row",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "https://airtable.com/appRYCTzOiT7aFc0x/pagMRqCpjcy9nutdJ",
+          "mode": "url"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "https://airtable.com/appRYCTzOiT7aFc0x/tbleqTcD6iNO2IlIX/viwH5kYgqhsiNEEdD",
+          "mode": "url"
+        },
+        "triggerField": "Created At",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        400
+      ],
+      "id": "d628ab44-3197-467d-bc0e-b1d8fe0f99c5",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ug319CBbboShlzue",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lead Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Lead": {
+      "main": [
+        [
+          {
+            "node": "Is Valid Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid Lead": {
+      "main": [
+        [
+          {
+            "node": "Create Lead Record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Incomplete Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Lead Record": {
+      "main": [
+        [
+          {
+            "node": "AI Lead Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Lead Analysis": {
+      "main": [
+        [
+          {
+            "node": "Apply Business Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Business Rules": {
+      "main": [
+        [
+          {
+            "node": "Update AI Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update AI Results": {
+      "main": [
+        [
+          {
+            "node": "Update Business Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Business Rules": {
+      "main": [
+        [
+          {
+            "node": "Send Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable Trigger": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "06946c1f-07a9-4aa3-a9ee-8564d51abf8a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c7ebcb084f97ee0e5e0414fdbbf4f4b47cdd35f0f0be7095521b9418fe429122"
+  },
+  "nodeGroups": [
+    {
+      "id": "244fb62b-af4f-4985-b747-3cd0ce8cf1f4",
+      "name": "Ingest & Validate",
+      "nodeIds": [
+        "dab85059-a166-4e06-abd3-3eb9d5086e77",
+        "c6772251-b74b-46b5-ad5c-99460fc098d8"
+      ],
+      "description": "Receive the JSON webhook lead, extract fields, and run basic validation."
+    },
+    {
+      "id": "559ce2c6-d199-46fd-89ca-269949edd983",
+      "name": "Invalid Lead",
+      "nodeIds": [
+        "d792e915-ba9d-45b3-a4b3-e7ef8c46da81"
+      ],
+      "description": "Store incomplete leads in Airtable flagged as missing required information."
+    },
+    {
+      "id": "f5b418dd-07c4-4ef6-83b5-a827a985824d",
+      "name": "AI Processing",
+      "nodeIds": [
+        "d05e514b-41ab-4b5c-9ddf-dd5621404476",
+        "7df0a479-2c1d-4dcc-bf66-4fa948667e12",
+        "ce8d90a6-7fc3-400a-9f0e-b5bbd6aa8f34"
+      ],
+      "description": "Create the record, run mandatory AI analysis, and apply business rules."
+    },
+    {
+      "id": "8eb46fd6-8dd1-4d13-85ec-a8711f61ce65",
+      "name": "Persist & Notify",
+      "nodeIds": [
+        "044c9763-a346-497d-a939-f85c463edbf4",
+        "57d86b20-46bb-4505-95c1-b4446795b868",
+        "b10ca7b1-eac6-4598-be34-8346330e359c"
+      ],
+      "description": "Write AI + business-rule results back to Airtable and send a completion notification."
+    }
+  ],
+  "id": "ndcTYhDMfBf7jZAZ",
+  "tags": []
+}
